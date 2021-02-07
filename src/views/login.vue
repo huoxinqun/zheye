@@ -32,7 +32,9 @@
 </template>
 
 <script lang="ts">
-    import {defineComponent,ref} from "vue";
+    import { defineComponent,ref } from "vue";
+    import { useRouter } from 'vue-router';
+    import { useStore } from 'vuex';
     import VlidateForm from "../components/VliDataForm.vue";
     import ValidateInput,{ RulesProp } from '../components/ValiDateInput.vue'
 
@@ -44,6 +46,8 @@
         },
         setup() {
             const emailVal = ref()
+            const router = useRouter()
+            const store = useStore()
             const emailRules: RulesProp = [
                 { type: 'required', message: '电子邮箱地址不能为空' },
                 { type: 'email', message: '请输入正确的电子邮箱格式' }
@@ -53,7 +57,10 @@
                 { type: 'required', message: '密码不能为空' }
             ]
             const onFormSubmit = (result: boolean)=> {
-                console.log('result',result);
+                if(result){
+                    router.push('/')
+                    store.commit('login')
+                }
             }
             return {
                 emailVal,

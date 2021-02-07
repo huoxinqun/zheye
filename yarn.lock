@@ -7607,6 +7607,11 @@ vue@^3.0.0:
     "@vue/runtime-dom" "3.0.2"
     "@vue/shared" "3.0.2"
 
+vuex@^3.6.2:
+  version "3.6.2"
+  resolved "https://registry.npm.taobao.org/vuex/download/vuex-3.6.2.tgz#236bc086a870c3ae79946f107f16de59d5895e71"
+  integrity sha1-I2vAhqhww655lG8QfxbeWdWJXnE=
+
 watchpack-chokidar2@^2.0.0:
   version "2.0.0"
   resolved "https://registry.npm.taobao.org/watchpack-chokidar2/download/watchpack-chokidar2-2.0.0.tgz#9948a1866cbbd6cb824dea13a7ed691f6c8ddff0"
