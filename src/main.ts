@@ -1,4 +1,7 @@
 import { createApp } from 'vue'
+import router from "@/router";
+import axios from 'axios'
+import store from './store'
 
 import App from './App.vue'
 // @ts-ignore
@@ -7,8 +10,20 @@ import 'bootstrap/dist/css/bootstrap.min.css'
 // import 'bootstrap/dist/js/ bootstrap.bundle.min.js '
 import 'bootstrap/dist/js/bootstrap.min.js'
 import 'font-awesome/css/font-awesome.min.css'
-import router from "@/router";
-import store from './store'
+axios.defaults.baseURL= 'http://apis.imooc.com/api/'
+axios.interceptors.request.use(config => {
+    //get 请求
+    config.params = { ...config.params,icode: '9182D83691E4B0E8'}
+    //其他 请求
+    if(config.data instanceof FormData) {
+        config.data.append('icode','9182D83691E4B0E8')
+    } else {
+        config.data = { ...config.data,icode:'9182D83691E4B0E8'}
+    }
+    return config 
+})
+
+
 
 const app = createApp(App,$)
 app.use(router);

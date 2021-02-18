@@ -3,6 +3,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import Home from './views/Home.vue'
 import Login from './views/login.vue'
 import Signup from './views/signup.vue'
+import ColumnDetail from './views/columnDetail.vue'
 
 const routerHistory = createWebHistory()
 const router = createRouter({
@@ -27,11 +28,24 @@ const router = createRouter({
             }
         },
         {
+            path: '/column/:id',
+            name: 'columnDetail',
+            component: ColumnDetail
+        },
+        {
             path: "/:pathMatch(.*)*",  //注意vue3 不能用*直接代替，要用正则
             redirect: "/"
         }
     ]
 })
+
+// import CreatePost from './views/CreatePost.vue'
+ // {
+        //     path: '/create',
+        //     name: 'create',
+        //     component: CreatePost,
+        //     meta: { auth: true }
+        // },
 
 // 路由守卫
 router.beforeEach((to,from,next)=>{
