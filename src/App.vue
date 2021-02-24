@@ -1,5 +1,6 @@
 <template>
   <user-header :user="userData"></user-header>
+  <loader  v-if="isLoading" text="玩命加载中..." background="rgba(0,0,0,0.8)"></loader>
   <div class="container">
     <router-view></router-view>
   </div>
@@ -20,17 +21,21 @@
 import { defineComponent,computed } from 'vue';
 import { useStore } from 'vuex';
 import UserHeader,{ UserProps } from './components/GlobalHeader.vue'
+import Loader from './components/loader.vue'
 
 export default defineComponent({
   name: 'App',
   components: {
-    UserHeader
+    UserHeader,
+    Loader
   },
   setup() {
     const store = useStore();
-    const userData = computed( ()=>store.state.user );
+    const userData = computed( ()=> store.state.user );
+    const isLoading = computed( ()=> store.state.loading );
     return {
       userData,
+      isLoading
     }
   }
 });

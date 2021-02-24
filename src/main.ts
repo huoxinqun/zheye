@@ -12,6 +12,8 @@ import 'bootstrap/dist/js/bootstrap.min.js'
 import 'font-awesome/css/font-awesome.min.css'
 axios.defaults.baseURL= 'http://apis.imooc.com/api/'
 axios.interceptors.request.use(config => {
+    //显示loading
+    store.commit('setLoading',true)
     //get 请求
     config.params = { ...config.params,icode: '9182D83691E4B0E8'}
     //其他 请求
@@ -21,6 +23,11 @@ axios.interceptors.request.use(config => {
         config.data = { ...config.data,icode:'9182D83691E4B0E8'}
     }
     return config 
+})
+axios.interceptors.response.use(config => {
+    //隐藏loading
+    store.commit('setLoading',false)
+    return config
 })
 
 

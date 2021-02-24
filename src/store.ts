@@ -27,6 +27,7 @@ export interface PostProps {
   column:string;   
 }
 export interface GlobalDataProps {
+  loading:boolean;
   user: UserProps;
   columns:ColumnProps[];
   posts:PostProps[];
@@ -34,11 +35,14 @@ export interface GlobalDataProps {
 }
 //定义get 公共async方法
 const getAndCommit = async (url:string,mutationName:string,commit:Commit) => {
+  // commit('setLoading',true)
   const { data } = await axios.get(url)
   commit(mutationName,data)
+  // commit('setLoading',false)
 }
 const store = createStore<GlobalDataProps>({
     state: {
+      loading: false,
       user: { isLogin: false },
       columns: [],
       posts: []
@@ -55,6 +59,9 @@ const store = createStore<GlobalDataProps>({
       },
       fetchPosts(state,rawData){
         state.posts = rawData.data.list
+      },
+      setLoading(state,status) {
+        state.loading = status
       }
       // createPost(state,newPost) {
       //   state.posts.push(newPost)
