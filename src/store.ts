@@ -1,4 +1,4 @@
-import axios from 'axios'
+import axios,{ AxiosRequestConfig } from 'axios'
 import { createStore,Commit } from 'vuex'
 
 export interface UserProps {
@@ -31,26 +31,33 @@ export interface GlobalDataProps {
   user: UserProps;
   columns:ColumnProps[];
   posts:PostProps[];
-  
+  token: String
 }
 //定义get 公共async方法
 const getAndCommit = async (url:string,mutationName:string,commit:Commit) => {
-  // commit('setLoading',true)
   const { data } = await axios.get(url)
   commit(mutationName,data)
-  // commit('setLoading',false)
 }
+
+//定义post 公共async方法
+const postAndCommit = async (url:string,mutationName:string,commit:Commit,payload:any) => {
+  const { data } = await axios.post(url,payload)
+  commit(mutationName,data)
+  return data
+}
+
 const store = createStore<GlobalDataProps>({
     state: {
       loading: false,
       user: { isLogin: false },
       columns: [],
-      posts: []
+      posts: [],
+      token: ''
     },
     mutations: {
-      login(state) {
-        state.user = {...state.user,isLogin: true,name: 'hxq'}
-      },
+      // login(state) {
+      //   state.user = {...state.user,isLogin: true,name: 'hxq'}
+      // },
       fetchColumns(state,rawData){
         state.columns = rawData.data.list
       },
@@ -62,6 +69,11 @@ const store = createStore<GlobalDataProps>({
       },
       setLoading(state,status) {
         state.loading = status
+      },
+      login(state,rawData){
+        const { token } = rawData.data
+        state.token = token
+        axios.defaults.headers.common.Authorization = `Beater` + token
       }
       // createPost(state,newPost) {
       //   state.posts.push(newPost)
@@ -87,6 +99,10 @@ const store = createStore<GlobalDataProps>({
       async fetchPosts({ commit },cid) {
         getAndCommit(`/columns/${cid}/posts`,'fetchPosts',commit)       
       },
+      //登录
+      login({commit},payload){
+        return postAndCommit(`/user/login`,'login',commit,payload)
+      }
     },
     getters :{
       getColumnById:(state) => (id:string) => {
