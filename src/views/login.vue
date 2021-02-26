@@ -62,7 +62,7 @@
                         email: emailVal.value,
                         password : pwdVal.value
                     }
-                    store.dispatch('login',payload).then(data => {
+                    store.dispatch('loginAndFetch',payload).then(data => {
                         console.log(data)
                         router.push('/')
                     })

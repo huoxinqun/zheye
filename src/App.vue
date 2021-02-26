@@ -18,10 +18,12 @@
 </template>
 
 <script lang="ts">
-import { defineComponent,computed } from 'vue';
+import { defineComponent,computed,onMounted } from 'vue';
+import axios from 'axios'
 import { useStore } from 'vuex';
-import UserHeader,{ UserProps } from './components/GlobalHeader.vue'
+import UserHeader from './components/GlobalHeader.vue'
 import Loader from './components/loader.vue'
+import { GlobalDataProps } from './store'
 
 export default defineComponent({
   name: 'App',
@@ -30,9 +32,17 @@ export default defineComponent({
     Loader
   },
   setup() {
-    const store = useStore();
+    const store = useStore<GlobalDataProps>();
     const userData = computed( ()=> store.state.user );
     const isLoading = computed( ()=> store.state.loading );
+    //初始化store localstorage 后，APP判断第一次加载是否登陆，若登陆，设置请求Authorization头发送fetchCurrentUser请求，成功显示，失败过期提示
+    const token = computed(() => store.state.token)
+    onMounted(() => {
+      if(!userData.value.isLogin && token.value){
+        axios.defaults.headers.common.Authorization = `Bearer ${token.value}`
+        store.dispatch('fetchCurrentUser')
+      }
+    })
     return {
       userData,
       isLoading

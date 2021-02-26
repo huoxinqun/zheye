@@ -6,7 +6,7 @@
             <li class="list-inline-item"><router-link to="/signup"><div href="#" class="btn btn-outline-light my-2">注册</div></router-link></li>
         </ul>
         <ul v-else class="list-inline mb-0">
-            <Dropdown :title="`你好，${ user.name }`">
+            <Dropdown :title="`你好，${ user.nickName }`">
                 <DropdownItem><a href="#" class="dropdown-item">新建新闻</a></DropdownItem>
                 <DropdownItem disabled><a href="#" class="dropdown-item">编辑资料</a></DropdownItem>
                 <DropdownItem><a href="#" class="dropdown-item">退出登录</a></DropdownItem>
@@ -19,11 +19,7 @@
     import { defineComponent, PropType } from 'vue'
     import Dropdown from "@/components/Dropdown.vue";
     import DropdownItem from  '@/components/DropdowmItem.vue'
-    export interface UserProps {
-        isLogin: boolean;
-        name?: string;
-        id?: number;
-    }
+    import { UserProps } from '../store'
     export default defineComponent({
         name: 'GlobalHeader',
         components:{

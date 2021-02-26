@@ -2,9 +2,12 @@ import axios,{ AxiosRequestConfig } from 'axios'
 import { createStore,Commit } from 'vuex'
 
 export interface UserProps {
-    isLogin: boolean;
-    name?: string;
-    id?: number
+    isLogin : boolean;
+    nickName ?: string;
+    _id ?: string;
+    column ?: string;
+    email ?: string;
+    avatar ?: ImageProps;
 }
 export interface ColumnProps {
   _id:string;
@@ -52,7 +55,7 @@ const store = createStore<GlobalDataProps>({
       user: { isLogin: false },
       columns: [],
       posts: [],
-      token: ''
+      token: localStorage.getItem('token') || ''
     },
     mutations: {
       // login(state) {
@@ -71,10 +74,15 @@ const store = createStore<GlobalDataProps>({
         state.loading = status
       },
       login(state,rawData){
+        //1.获取token 2.设置header 3.更新状态,显示用户名
         const { token } = rawData.data
         state.token = token
-        axios.defaults.headers.common.Authorization = `Beater` + token
-      }
+        localStorage.setItem('token',token)
+        axios.defaults.headers.common.Authorization = `Bearer ${token}`
+      },
+      fetchCurrentUser(state, rawData) {
+        state.user = { isLogin: true, ...rawData.data }
+      },
       // createPost(state,newPost) {
       //   state.posts.push(newPost)
       // }
@@ -102,6 +110,16 @@ const store = createStore<GlobalDataProps>({
       //登录
       login({commit},payload){
         return postAndCommit(`/user/login`,'login',commit,payload)
+      },
+      //获取用户信息
+      fetchCurrentUser({ commit }) {
+        return getAndCommit('/user/current', 'fetchCurrentUser', commit)
+      },
+      // axios登录请求后-请求用户信息接口
+      loginAndFetch({ dispatch }, loginData) {
+        return dispatch('login', loginData).then(() => {
+            return dispatch('fetchCurrentUser')
+        })
       }
     },
     getters :{
