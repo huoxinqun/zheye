@@ -29,7 +29,13 @@ export interface PostProps {
   createdAt : string;
   column:string;   
 }
+
+export interface GlobalErrorProps{
+  status:boolean;
+  message ?: string;
+}
 export interface GlobalDataProps {
+  error:GlobalErrorProps;
   loading:boolean;
   user: UserProps;
   columns:ColumnProps[];
@@ -51,6 +57,7 @@ const postAndCommit = async (url:string,mutationName:string,commit:Commit,payloa
 
 const store = createStore<GlobalDataProps>({
     state: {
+      error:{ status:false },
       loading: false,
       user: { isLogin: false },
       columns: [],
@@ -72,6 +79,9 @@ const store = createStore<GlobalDataProps>({
       },
       setLoading(state,status) {
         state.loading = status
+      },
+      setError(state,e: GlobalErrorProps){
+        state.error = e
       },
       login(state,rawData){
         //1.获取token 2.设置header 3.更新状态,显示用户名

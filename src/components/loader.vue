@@ -16,6 +16,7 @@
 
 <script lang="ts">
 import { defineComponent, onUnmounted } from 'vue'
+import useDOMCreate from '../hooks/useDOMCreate'
 
 export default defineComponent({
   props: {
@@ -29,13 +30,7 @@ export default defineComponent({
   setup() {
     // teleport 挂载最外层back  
     // 渲染组件前创建back div
-    const node = document.createElement('div')
-    node.id = 'back'
-    document.body.appendChild(node)
-    // 渲染完成后删除back自身元素
-    onUnmounted(() => {
-      document.body.removeChild(node)
-    })
+     useDOMCreate('back')
   }
 })
 </script>
