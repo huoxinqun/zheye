@@ -1,6 +1,5 @@
 <template>
   <user-header :user="userData"></user-header>
-  <message type="error" :message="error.message" v-if="error.status"></message>
   <loader  v-if="isLoading" text="玩命加载中..." background="rgba(0,0,0,0.8)"></loader>
   <div class="container">
     <router-view></router-view>
@@ -19,20 +18,19 @@
 </template>
 
 <script lang="ts">
-import { defineComponent,computed,onMounted } from 'vue'
+import { defineComponent,computed,onMounted,watch } from 'vue'
 import axios from 'axios'
 import { useStore } from 'vuex'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import UserHeader from './components/GlobalHeader.vue'
 import Loader from './components/loader.vue'
+import createMessage from './components/createMessage'
 import { GlobalDataProps } from './store'
-import Message from './components/Message.vue'
 export default defineComponent({
   name: 'App',
   components: {
     UserHeader,
     Loader,
-    Message
   },
   setup() {
     const store = useStore<GlobalDataProps>();
@@ -46,6 +44,12 @@ export default defineComponent({
         axios.defaults.headers.common.Authorization = `Bearer ${token.value}`
         store.dispatch('fetchCurrentUser')
       }
+    })
+    watch(()=>error.value.status,() => {
+      const { status,message } = error.value 
+      if(status && message) {
+        createMessage(message,'error')
+      } 
     })
     return {
       userData,

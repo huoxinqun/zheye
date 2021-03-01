@@ -37,6 +37,7 @@
     import { useStore } from 'vuex';
     import VlidateForm from "../components/VliDataForm.vue";
     import ValidateInput,{ RulesProp } from '../components/ValiDateInput.vue'
+    import createMessage from '../components/createMessage'
 
     export default defineComponent({
         name: "login",
@@ -63,8 +64,10 @@
                         password : pwdVal.value
                     }
                     store.dispatch('loginAndFetch',payload).then(data => {
-                        console.log(data)
-                        router.push('/')
+                        createMessage('登录成功，2秒后跳转首页','success')
+                        setTimeout(() => {
+                            router.push('/')
+                        },2000)
                     }).catch(e => {
                     //  console.log(e)
                     })
