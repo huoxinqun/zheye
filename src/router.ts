@@ -4,6 +4,7 @@ import Home from './views/Home.vue'
 import Login from './views/login.vue'
 import Signup from './views/signup.vue'
 import ColumnDetail from './views/columnDetail.vue'
+import CreatePost from './views/createPost.vue'
 
 const routerHistory = createWebHistory()
 const router = createRouter({
@@ -33,19 +34,20 @@ const router = createRouter({
             component: ColumnDetail
         },
         {
+            path: '/create',
+            name: 'create',
+            component: CreatePost,
+            meta:{
+                auth:true
+            }
+        },
+        {
             path: "/:pathMatch(.*)*",  //注意vue3 不能用*直接代替，要用正则
             redirect: "/"
         }
     ]
 })
 
-// import CreatePost from './views/CreatePost.vue'
- // {
-        //     path: '/create',
-        //     name: 'create',
-        //     component: CreatePost,
-        //     meta: { auth: true }
-        // },
 
 // 路由守卫
 router.beforeEach((to,from,next)=>{
@@ -53,7 +55,7 @@ router.beforeEach((to,from,next)=>{
     // from从哪个路径来
     // next往下执行的回调
     // 在localStorage中获取token
-    let token=localStorage.getItem('userName')
+    let token=localStorage.getItem('token')
     // 判断该页面是否需要登录
     if(to.meta.auth){
         // 如果token存在直接跳转

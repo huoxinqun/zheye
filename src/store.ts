@@ -21,7 +21,7 @@ export interface ImageProps {
   createdAt ?: string;
 }
 export interface PostProps {
-  _id:string;
+  _id ?:string;
   title:string;
   excerpt ?: string;
   content:string;
@@ -68,6 +68,9 @@ const store = createStore<GlobalDataProps>({
       // login(state) {
       //   state.user = {...state.user,isLogin: true,name: 'hxq'}
       // },
+      createPost(state, newPost) {
+        state.posts.push(newPost)
+      },
       fetchColumns(state,rawData){
         state.columns = rawData.data.list
       },
