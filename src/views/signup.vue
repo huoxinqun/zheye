@@ -8,7 +8,7 @@
                         type="text"
                         placeholder="请输入邮箱地址"
                         :rules="emailRules"
-                        v-model="emailVal">
+                        v-model="formData.emailVal">
                 </validate-input>
                 {{ emailVal }}
             </div>
@@ -18,7 +18,7 @@
                         type="text"
                         placeholder="请输入用户名"
                         :rules="userRules"
-                        v-model="userVal">
+                        v-model="formData.userVal">
                 </validate-input>
             </div>
             <div class="mb-3">
@@ -27,7 +27,7 @@
                         type="password"
                         placeholder="请输入密码"
                         :rules="pwdRules"
-                        v-model="pwdVal">
+                        v-model="formData.pwdVal">
                     >
                 </validate-input>
             </div>
@@ -37,7 +37,7 @@
                         type="password"
                         placeholder="请输入确认密码"
                         :rules="confirmpwdRules"
-                        v-model="confirmpwdVal">
+                        v-model="formData.confirmpwdVal">
                     >
                 </validate-input>
             </div>
@@ -51,10 +51,12 @@
 </template>
 
 <script lang="ts">
-    import {defineComponent,ref} from "vue";
+    import {defineComponent,reactive} from "vue";
+    import axios from 'axios'
+    import { useRouter } from 'vue-router'
     import VlidateForm from "../components/VliDataForm.vue";
     import ValidateInput,{ RulesProp } from '../components/ValiDateInput.vue'
-    import router from "@/router";
+    import createMessage from '../components/createMessage'
 
     export default defineComponent({
         name: "signup",
@@ -63,40 +65,59 @@
             ValidateInput
         },
         setup() {
-            const emailVal = ref()
+            //reactive的用法与ref的用法相似，也是将数据变成响应式数据，当数据发生变化时UI也会自动更新。不同的是ref用于基本数据类型，而reactive是用于复杂数据类型，比如对象和数组
+            const formData = reactive({
+                emailVal: '',
+                userVal: '',
+                pwdVal: '',
+                confirmpwdVal: ''
+            })
+            const router = useRouter()
             const emailRules: RulesProp = [
                 { type: 'required', message: '电子邮箱地址不能为空' },
                 { type: 'email', message: '请输入正确的电子邮箱格式' }
             ]
-            const userVal = ref()
             const userRules: RulesProp = [
                 { type: 'required', message: '昵称不能为空' },
             ]
-            const pwdVal = ref()
             const pwdRules = [
                 { type: 'required', message: '密码不能为空' },
-                { type: 'password', message: '密码以字母开头，长度在6-18之间，只能包含字符、数字和下划线' }
+               // { type: 'password', message: '密码以字母开头，长度在6-18之间，只能包含字符、数字和下划线' }
             ]
-            const confirmpwdVal = ref()
             const confirmpwdRules = [
                 { type: 'required', message: '确认密码不能为空'},
+                { type: 'custom',
+                    validator: () => {
+                      return formData.pwdVal === formData.confirmpwdVal
+                    },
+                    message: '密码不相同'
+                }
             ]
             const onFormSubmit = (result: boolean)=> {
                 console.log('result',result)
                 if (result == true){
-
+                    const payload = {
+                        email: formData.emailVal,
+                        password: formData.pwdVal,
+                        nickName: formData.userVal
+                    }
+                    axios.post('/users/', payload).then(data => {
+                        createMessage('注册成功 正在跳转登录页面', 'success')
+                        setTimeout(() => {
+                            router.push('/login')
+                        }, 2000)
+                    }).catch(e => {
+                        //console.log(e)
+                    })
                 }
             }
             return {
-                emailVal,
                 emailRules,
-                userVal,
                 userRules,
-                pwdVal,
                 pwdRules,
-                confirmpwdVal,
                 confirmpwdRules,
                 onFormSubmit,
+                formData
             }
 
         }

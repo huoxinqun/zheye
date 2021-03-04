@@ -18,8 +18,9 @@
     const pwdReg = /^[a-zA-Z]\w{5,17}$/
     // 正确格式为：以字母开头，长度在6-18之间，只能包含字符、数字和下划线。
     interface RuleProp {
-        type: 'required' | 'email' | 'password';
+        type: 'required' | 'email' | 'password' | 'custom';
         message: string;
+        validator?: () => boolean;
     }
     export type RulesProp = RuleProp[]
     export default defineComponent({
@@ -53,6 +54,10 @@
                                 break;
                             case 'password':
                                 passed = pwdReg.test(inputRef.val)
+                                break
+                            case 'custom':
+                                // validator存在就返回本身，不存在默认true
+                                passed = rule.validator ? rule.validator() : true
                                 break
                             default:
                                 break

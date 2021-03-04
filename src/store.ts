@@ -93,6 +93,12 @@ const store = createStore<GlobalDataProps>({
       fetchCurrentUser(state, rawData) {
         state.user = { isLogin: true, ...rawData.data }
       },
+      logout(state) {
+        state.token = ''
+        state.user = { isLogin: false }
+        localStorage.removeItem('token')
+        delete axios.defaults.headers.common.Authorization
+      }
       // createPost(state,newPost) {
       //   state.posts.push(newPost)
       // }

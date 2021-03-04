@@ -19,7 +19,6 @@
                         placeholder="请输入密码"
                         :rules="pwdRules"
                         v-model="pwdVal">
-                    >
                 </validate-input>
             </div>
             <template v-slot:submit>

@@ -7,9 +7,9 @@
         </ul>
         <ul v-else class="list-inline mb-0">
             <Dropdown :title="`你好，${ user.nickName }`">
-                <DropdownItem><a href="#" class="dropdown-item">新建新闻</a></DropdownItem>
-                <DropdownItem disabled><a href="#" class="dropdown-item">编辑资料</a></DropdownItem>
-                <DropdownItem><a href="#" class="dropdown-item">退出登录</a></DropdownItem>
+                <DropdownItem closeAfterClick><a href="#" class="dropdown-item">新建新闻</a></DropdownItem>
+                <DropdownItem closeAfterClick disabled><a href="#" class="dropdown-item">编辑资料</a></DropdownItem>
+                <DropdownItem closeAfterClick><a href="#" class="dropdown-item" @click="handleLogout">退出登录</a></DropdownItem>
             </Dropdown>
         </ul>
     </nav>
@@ -17,9 +17,12 @@
 
 <script lang="ts">
     import { defineComponent, PropType } from 'vue'
+    import { useRouter } from 'vue-router'
     import Dropdown from "@/components/Dropdown.vue";
     import DropdownItem from  '@/components/DropdowmItem.vue'
-    import { UserProps } from '../store'
+    import store,{ UserProps } from '../store'
+    import createMessage from '../components/createMessage'
+
     export default defineComponent({
         name: 'GlobalHeader',
         components:{
@@ -30,6 +33,20 @@
             user: {
                 type: Object as PropType<UserProps>,
                 required: true
+            }
+        },
+        setup(){
+            const router = useRouter()
+            const handleLogout = () => {
+                store.commit('logout')
+                createMessage('退出登录成功，2秒后跳转到首页', 'success', 2000)
+                setTimeout(() => {
+                    router.push('/')
+                },2000)
+            }
+
+            return {
+              handleLogout
             }
         }
     })
