@@ -1,7 +1,29 @@
 <template>
   <div class="create-post-page">
     <h4>新建文章</h4>
-    <input type="file" name="file" @change.prevent="handleFileChange"/>
+    <upload-file
+      action="/upload"
+      :beforeUpload="uploadCheck"
+      @file-uploaded="handleFileUploaded"
+      :uploaded="uploadedData"
+      class="d-flex align-items-center justify-content-center bg-light text-secondary w-100 my-4"
+    >
+      <h2>点击上传头图</h2>
+      <template #loading>
+        <div class="d-flex">
+          <div class="spinner-border text-secondary" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+          <h2>正在上传</h2>
+        </div>
+      </template>
+      <template #uploaded="dataProps">
+        <div class="uploaded-area">
+          <img :src="dataProps.uploadedData.data.url">
+          <h3>点击重新上传</h3>
+        </div>
+      </template>
+    </upload-file>
     <validate-form @form-submit="onFormSubmit">
       <div class="mb-3">
         <label class="form-label">文章标题：</label>
@@ -38,13 +60,16 @@ import { useRouter } from 'vue-router'
 import { GlobalDataProps, PostProps } from '../store'
 import ValidateInput, { RulesProp } from '../components/ValiDateInput.vue'
 import ValidateForm from '../components/VliDataForm.vue'
+import uploadFile from '../components/Uploader.vue'
 import createMessage from '../components/createMessage'
+import { beforeUploadCheck } from '../helper'
 
 export default defineComponent({
   name: 'Login',
   components: {
     ValidateInput,
-    ValidateForm
+    ValidateForm,
+    uploadFile
   },
   setup() {
     const titleVal = ref('')
@@ -73,23 +98,16 @@ export default defineComponent({
         }
       }
     }
-    const handleFileChange = (e: Event) => {
-    const target = e.target as HTMLInputElement
-    const files = target.files
-    if (files) {
-        const uploadedFile = files[0]
-        const formData = new FormData()
-        formData.append('file', uploadedFile)
-        console.log(formData);
-        console.log('getFile', formData.get('file'));
-        axios.post('/upload', formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data'
-          }
-        }).then((resp: any) => {
-          console.log(resp)
-        })
+    const uploadCheck = (file: File) => {
+      const result = beforeUploadCheck(file, { format: ['image/jpeg', 'image/png'], size: 1 })
+      const { passed, error } = result
+      if (error === 'format') {
+        createMessage('上传图片只能是 JPG/PNG 格式!', 'error')
       }
+      if (error === 'size') {
+        createMessage('上传图片大小不能超过 1Mb', 'error')
+      }
+      return passed
     }
     return {
       titleRules,
@@ -97,7 +115,6 @@ export default defineComponent({
       contentVal,
       contentRules,
       onFormSubmit,
-      handleFileChange
     }
   }
 })

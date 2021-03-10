@@ -18,6 +18,8 @@ export interface ColumnProps {
 export interface ImageProps {
   _id ?: string;
   url ?: string;
+  extname ?: string,
+  filename ?: string,
   createdAt ?: string;
 }
 export interface PostProps {
