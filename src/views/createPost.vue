@@ -4,7 +4,8 @@
     <upload-file
       action="/upload"
       :beforeUpload="uploadCheck"
-      @file-uploaded="handleFileUploaded"
+      @file-uploaded="onFileUploaded"
+      @file-uploaded-error="onFileUploadedError"
       :uploaded="uploadedData"
       class="d-flex align-items-center justify-content-center bg-light text-secondary w-100 my-4"
     >
@@ -12,7 +13,7 @@
       <template #loading>
         <div class="d-flex">
           <div class="spinner-border text-secondary" role="status">
-            <span class="visually-hidden">Loading...</span>
+            <span class="sr-only">Loading...</span>
           </div>
           <h2>正在上传</h2>
         </div>
@@ -57,7 +58,7 @@ import { defineComponent, ref } from 'vue'
 import axios from 'axios'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
-import { GlobalDataProps, PostProps } from '../store'
+import { GlobalDataProps, PostProps,ResponseType,ImageProps } from '../store'
 import ValidateInput, { RulesProp } from '../components/ValiDateInput.vue'
 import ValidateForm from '../components/VliDataForm.vue'
 import uploadFile from '../components/Uploader.vue'
@@ -75,6 +76,7 @@ export default defineComponent({
     const titleVal = ref('')
     const router = useRouter()
     const store = useStore<GlobalDataProps>()
+    let imageId = ''
     const titleRules: RulesProp = [
       { type: 'required', message: '文章标题不能为空' }
     ]
@@ -84,30 +86,49 @@ export default defineComponent({
     ]
     const onFormSubmit = (result: boolean) => {
       if (result) {
-        const { column } = store.state.user
+        const { column,_id } = store.state.user
         if (column) {
           const newPost: PostProps = {
-            _id: new Date().getTime().toString(),
             title: titleVal.value,
             content: contentVal.value,
             column,
-            createdAt: new Date().toLocaleString()
+            author:_id,
           }
-          store.commit('createPost', newPost)
-          router.push({ name: 'column', params: { id: column } })
+          if(imageId){
+            newPost.image = imageId
+          }
+          store.dispatch('creatPost', newPost).then(() => {
+            createMessage('发表成功，2秒后跳转到文章', 'success', 2000)
+            setTimeout(() => {
+              router.push({name: 'column', params: { id: column } })
+            }, 2000)
+          })
+          //store.commit('createPost', newPost)
+          //router.push({ name: 'column', params: { id: column } })
         }
       }
     }
+    /*自定义校验*/
     const uploadCheck = (file: File) => {
-      const result = beforeUploadCheck(file, { format: ['image/jpeg', 'image/png'], size: 1 })
+      const result = beforeUploadCheck(file, { format: ['image/png'], size: 1 })
       const { passed, error } = result
       if (error === 'format') {
-        createMessage('上传图片只能是 JPG/PNG 格式!', 'error')
+        createMessage('上传图片只能是 PNG 格式!', 'error')
       }
       if (error === 'size') {
         createMessage('上传图片大小不能超过 1Mb', 'error')
       }
       return passed
+    }
+    const onFileUploaded = (rawData: ResponseType<ImageProps>) => {
+      if(rawData.data._id){
+        imageId = rawData.data._id
+      }
+      createMessage(`上传图片ID ${rawData.data._id}`,'success')
+    }
+    const onFileUploadedError = (error: any) => {
+      console.log(error)
+      createMessage(`上传图片失败， ${error.message}`,'error')
     }
     return {
       titleRules,
@@ -115,6 +136,9 @@ export default defineComponent({
       contentVal,
       contentRules,
       onFormSubmit,
+      uploadCheck,
+      onFileUploaded,
+      onFileUploadedError
     }
   }
 })

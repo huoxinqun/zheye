@@ -1,6 +1,11 @@
 import axios,{ AxiosRequestConfig } from 'axios'
 import { createStore,Commit } from 'vuex'
 
+export interface ResponseType<P = {}>{
+  code: number,
+  msg: string,
+  data: P
+}
 export interface UserProps {
     isLogin : boolean;
     nickName ?: string;
@@ -16,20 +21,20 @@ export interface ColumnProps {
   description ?: string;
 }
 export interface ImageProps {
-  _id ?: string;
-  url ?: string;
-  extname ?: string,
-  filename ?: string,
-  createdAt ?: string;
+  _id?: string;
+  url?: string;
+  createdAt?: string;
+  fitUrl?: string;
 }
 export interface PostProps {
   _id ?:string;
   title:string;
   excerpt ?: string;
   content:string;
-  image?: ImageProps;
-  createdAt : string;
-  column:string;   
+  image?: ImageProps | string;
+  createdAt ?: string;
+  column:string;  
+  author ?: string
 }
 
 export interface GlobalErrorProps{
@@ -103,10 +108,7 @@ const store = createStore<GlobalDataProps>({
         state.user = { isLogin: false }
         localStorage.removeItem('token')
         delete axios.defaults.headers.common.Authorization
-      }
-      // createPost(state,newPost) {
-      //   state.posts.push(newPost)
-      // }
+      },
     },
     actions:{
       // 获取首页文章列表
@@ -116,17 +118,17 @@ const store = createStore<GlobalDataProps>({
       //   })
       // },
      fetchColumns({ commit }) {
-       getAndCommit('/columns','fetchColumns',commit)
+      return getAndCommit('/columns','fetchColumns',commit)
         // const { data } = await axios.get('/columns')  
         // commit('fetchColumns',data)
       },
       // 获得一个专栏详情
       async fetchColumn({ commit },cid) {
-        getAndCommit(`/columns/${cid}`,'fetchColumn',commit)
+        return getAndCommit(`/columns/${cid}`,'fetchColumn',commit)
       },
       // 获取专栏的文章列表
       async fetchPosts({ commit },cid) {
-        getAndCommit(`/columns/${cid}/posts`,'fetchPosts',commit)       
+        return getAndCommit(`/columns/${cid}/posts`,'fetchPosts',commit)       
       },
       //登录
       login({commit},payload){
@@ -141,7 +143,11 @@ const store = createStore<GlobalDataProps>({
         return dispatch('login', loginData).then(() => {
             return dispatch('fetchCurrentUser')
         })
-      }
+      },
+       //新建文章
+      creatPost({ commit }, payload) {
+        return postAndCommit('/posts','createPost', commit, payload)
+      },
     },
     getters :{
       getColumnById:(state) => (id:string) => {

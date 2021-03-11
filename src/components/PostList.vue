@@ -5,7 +5,7 @@
         <h4><router-link :to="`/posts/${post._id}/`">{{post.title}}</router-link></h4>
         <div class="row my-3 align-items-center">
           <div v-if="post.image && typeof post.image !== 'string'" class="col-4">
-            <img :src="post.image.url" :alt="post.title" class="rounded-lg">
+            <img :src="post.image.fitUrl" :alt="post.title" class="rounded-lg">
           </div>
           <p :class="{'col-8': post.image}" class="text-muted">{{post.excerpt}}</p>
         </div>
@@ -18,6 +18,7 @@
 <script lang="ts">
 import { defineComponent, PropType, computed } from 'vue'
 import { PostProps, ImageProps } from '../store'
+import { generateFitUrl } from '../helper'
 
 export default defineComponent({
   props: {
@@ -28,14 +29,18 @@ export default defineComponent({
   },
   setup(props) {
     const posts = computed(() => {
-      return props.list.map(post => {
+      /*return props.list.map(post => {
          if (!post.image){
             post.image = {
-              url : require('@/assets/logo.png')
+              fitUrl : require('@/assets/logo.png')
             }
           }else{
-            post.image.url = post.image.url + '?x-oss-process=image/resize,m_fixed,h_200,w_250'
+            post.image.fitUrl = post.image.url + '?x-oss-process=image/resize,m_fixed,h_200,w_250'
           }
+        return post
+      })*/
+      return props.list.map(post => {
+        generateFitUrl(post.image as ImageProps, 250, 200, ['m_fill'])
         return post
       })
     })

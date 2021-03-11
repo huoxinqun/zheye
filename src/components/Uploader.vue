@@ -1,6 +1,6 @@
 <template>
     <div class="file-upload">
-        <div class="file-upload-container" @click.prevent="triggerUpload" >
+        <div class="file-upload-container" @click.prevent="triggerUpload" v-bind="$attrs">
             <slot v-if="fileStatus === 'loading'" name="loading">
                 <button class="btn btn-primary" disabled>正在上传...</button>
             </slot>
@@ -24,6 +24,7 @@ import { defineComponent,ref,PropType  } from 'vue'
 import axios from 'axios'
 
 type UploadStatus = 'ready' | 'loading' | 'success' | 'error'
+//用户自定义函数事件，传值文件，返回boolean
 type CheckFunction = (file: File) => boolean;
 
 export default defineComponent({
@@ -39,9 +40,12 @@ export default defineComponent({
         type: Object
       }
     },
+    inheritAttrs: false,
+    emits: ['file-uploaded', 'file-uploaded-error'],
     setup(props,context){
         const fileInput= ref<null | HTMLInputElement>(null)
-        const uploadedData = ref(props.uploaded)
+        //把成功后data返回slot-图片回显
+        const uploadedData = ref(props.uploaded)  
         const fileStatus = ref<UploadStatus>('ready')
     
         const triggerUpload = () => {
@@ -52,9 +56,12 @@ export default defineComponent({
         const handleFileChange = (e: Event) => {
             const currentTarget = e.target as HTMLInputElement
             if (currentTarget.files) { 
+                //转换array
                 const files = Array.from(currentTarget.files)
+                //判断是否满足用户自定义属性
                 if (props.beforeUpload) {
                     const result = props.beforeUpload(files[0])
+                    console.log(result)
                     if (!result) {
                         return
                     }
@@ -64,19 +71,19 @@ export default defineComponent({
                 const formData = new FormData()
                 formData.append('file', uploadedFile)
                 // console.log('getFile', formData.get('file'));
-                axios.post('/upload', formData, {
+                axios.post(props.action, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 }
                 }).then((resp: any) => {
-                    console.log(resp.data)
                     fileStatus.value = 'success' 
                     uploadedData.value =  resp.data;
-                    context.emit('file-uploaded-success', resp.data)
+                    context.emit('file-uploaded', resp.data)
                 }).catch((error) => {
                     fileStatus.value = 'error' 
                     context.emit('file-uploaded-error', { error })
                 }).finally(() => {
+                    //fileInput.value是DOM节点
                     if (fileInput.value) {
                         fileInput.value.value = ''
                     }
