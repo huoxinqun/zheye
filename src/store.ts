@@ -26,7 +26,7 @@ export interface ImageProps {
   createdAt?: string;
   fitUrl?: string;
 }
-export interface PostProps {
+export interface PostProps<P = {}> {
   _id ?:string;
   title:string;
   excerpt ?: string;
@@ -34,7 +34,7 @@ export interface PostProps {
   image?: ImageProps | string;
   createdAt ?: string;
   column:string;  
-  author ?: string
+  author ?: string | P
 }
 
 export interface GlobalErrorProps{
@@ -75,6 +75,9 @@ const store = createStore<GlobalDataProps>({
       // login(state) {
       //   state.user = {...state.user,isLogin: true,name: 'hxq'}
       // },
+      postDetail(state,rawData) {
+        state.posts = [rawData.data]
+      },
       createPost(state, newPost) {
         state.posts.push(newPost)
       },
@@ -148,6 +151,9 @@ const store = createStore<GlobalDataProps>({
       creatPost({ commit }, payload) {
         return postAndCommit('/posts','createPost', commit, payload)
       },
+      postDetail({ commit }, cid) {
+        return getAndCommit(`/posts/${cid}`, 'postDetail', commit)
+      }
     },
     getters :{
       getColumnById:(state) => (id:string) => {
@@ -155,6 +161,9 @@ const store = createStore<GlobalDataProps>({
       },
       getPostsByCid:(state) => (cid:string) => {
         return state.posts.filter(post => post.column === cid)
+      },
+      getCurrentPost: (state) => (id: string) => {
+        return state.posts.find(post => post._id === id)
       }
     }
   })

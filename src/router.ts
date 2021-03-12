@@ -5,6 +5,7 @@ import Login from './views/login.vue'
 import Signup from './views/signup.vue'
 import ColumnDetail from './views/columnDetail.vue'
 import CreatePost from './views/createPost.vue'
+import postDetail from './views/postDetail.vue'
 
 const routerHistory = createWebHistory()
 const router = createRouter({
@@ -40,6 +41,11 @@ const router = createRouter({
             meta:{
                 auth:true
             }
+        },
+        {
+            path: '/postDetail/:id',
+            name: 'postDetail',
+            component: postDetail
         },
         {
             path: "/:pathMatch(.*)*",  //注意vue3 不能用*直接代替，要用正则

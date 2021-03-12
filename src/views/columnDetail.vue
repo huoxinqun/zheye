@@ -42,7 +42,6 @@ export default defineComponent({
       return selectColumn
     })
     const list = computed(() => store.getters.getPostsByCid(currentId))
-
     return {
       column,
       list
