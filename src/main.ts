@@ -16,12 +16,12 @@ axios.interceptors.request.use(config => {
     store.commit('setLoading',true)
     store.commit('setError', { status: false, message: '' })
     //get 请求
-    config.params = { ...config.params,icode: '9182D83691E4B0E8'}
+    config.params = { ...config.params,icode: 'E4C27999702C2672'}
     //其他 请求
     if(config.data instanceof FormData) {
-        config.data.append('icode','9182D83691E4B0E8')
+        config.data.append('icode','E4C27999702C2672')
     } else {
-        config.data = { ...config.data,icode:'9182D83691E4B0E8'}
+        config.data = { ...config.data,icode:'E4C27999702C2672'}
     }
     return config 
 })

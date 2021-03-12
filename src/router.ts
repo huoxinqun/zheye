@@ -30,7 +30,7 @@ const router = createRouter({
         },
         {
             path: '/column/:id',
-            name: 'columnDetail',
+            name: 'column',
             component: ColumnDetail
         },
         {
