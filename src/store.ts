@@ -26,15 +26,16 @@ export interface ImageProps {
   createdAt?: string;
   fitUrl?: string;
 }
-export interface PostProps<P = {}> {
+export interface PostProps {
   _id ?:string;
   title:string;
   excerpt ?: string;
+  isHTML ?: string;
   content:string;
   image?: ImageProps | string;
   createdAt ?: string;
   column:string;  
-  author ?: string | P
+  author ?: string | UserProps
 }
 
 export interface GlobalErrorProps{
@@ -53,6 +54,7 @@ export interface GlobalDataProps {
 const getAndCommit = async (url:string,mutationName:string,commit:Commit) => {
   const { data } = await axios.get(url)
   commit(mutationName,data)
+  return data
 }
 
 //定义post 公共async方法
@@ -151,6 +153,7 @@ const store = createStore<GlobalDataProps>({
       creatPost({ commit }, payload) {
         return postAndCommit('/posts','createPost', commit, payload)
       },
+      //文章详情
       postDetail({ commit }, cid) {
         return getAndCommit(`/posts/${cid}`, 'postDetail', commit)
       }

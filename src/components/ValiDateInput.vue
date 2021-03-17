@@ -1,29 +1,27 @@
 <template>
     <div class="validate-input-container pb-3">
         <input class="form-control"
-               v-if="tag !== 'textarea'"
-               :class="{'is-invalid': inputRef.error}"
-               :value="inputRef.val"
-               @blur="validateInput"
-               @input="updateValue"
-               v-bind="$attrs"
+            v-if="tag !== 'textarea'"
+            :class="{'is-invalid': inputRef.error}"
+            @blur="validateInput"
+            v-model="inputRef.val"
+            v-bind="$attrs"
         >
-         <textarea
+        <textarea
             v-else
             class="form-control"
             :class="{'is-invalid': inputRef.error}"
-            :value="inputRef.val"
             @blur="validateInput"
-            @input="updateValue"
+            v-model="inputRef.val"
             v-bind="$attrs"
-         >
+        >
         </textarea>
         <span v-if="inputRef.error" class="invalid-feedback">{{inputRef.message}}</span>
     </div>
 </template>
 
 <script lang="ts">
-    import { defineComponent, reactive, PropType,onMounted } from 'vue'
+    import { defineComponent, reactive, PropType,onMounted,computed } from 'vue'
     import { emitter } from './VliDataForm.vue'
     const emailReg = /^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/
     const pwdReg = /^[a-zA-Z]\w{5,17}$/
@@ -38,7 +36,7 @@
     export default defineComponent({
         props: {
             rules: Array as PropType<RulesProp>,
-            modeValue: String,
+            modelValue: String,
             tag: {
                 type: String as PropType<TagType>,
                 default: 'input'
@@ -47,15 +45,15 @@
         inheritAttrs:false,
         setup(props,context) {
             const inputRef = reactive({
-                val: props.modeValue || '',
+                val: computed({
+                    get: () => props.modelValue || '',
+                    set: val => {
+                    context.emit('update:modelValue', val)
+                    }
+                }),
                 error: false,
                 message: ''
             })
-            const updateValue = (e: KeyboardEvent) => {
-              const targetValue = (e.target as HTMLInputElement).value
-              inputRef.val = targetValue
-              context.emit('update:modelValue',targetValue)
-            }
             const validateInput = () => {
                 if (props.rules) {
                     const allPassed = props.rules.every(rule => {
@@ -90,8 +88,7 @@
             })
             return {
                 inputRef,
-                validateInput,
-                updateValue
+                validateInput
             }
         }
     })

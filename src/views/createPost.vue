@@ -54,10 +54,10 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue'
+import { defineComponent, ref, onMounted } from 'vue'
 import axios from 'axios'
 import { useStore } from 'vuex'
-import { useRouter } from 'vue-router'
+import { useRouter,useRoute } from 'vue-router'
 import { GlobalDataProps, PostProps,ResponseType,ImageProps } from '../store'
 import ValidateInput, { RulesProp } from '../components/ValiDateInput.vue'
 import ValidateForm from '../components/VliDataForm.vue'
@@ -73,8 +73,12 @@ export default defineComponent({
     uploadFile
   },
   setup() {
+    const uploadedData = ref()
     const titleVal = ref('')
     const router = useRouter()
+    const route = useRoute()
+    //转换boealean
+    const isEditMode = !!route.query.id
     const store = useStore<GlobalDataProps>()
     let imageId = ''
     const titleRules: RulesProp = [
@@ -84,6 +88,19 @@ export default defineComponent({
     const contentRules: RulesProp = [
       { type: 'required', message: '文章详情不能为空' }
     ]
+    // 判断是编辑请求数据
+   onMounted(() => {
+      if (isEditMode) {
+        store.dispatch('postDetail', route.query.id).then((rawData: ResponseType<PostProps>) => {
+          const currentPost = rawData.data
+          if (currentPost.image) {
+            uploadedData.value = { data: currentPost.image }
+          }
+          titleVal.value = currentPost.title 
+          contentVal.value = currentPost.content || ''
+        })
+      }
+    })
     const onFormSubmit = (result: boolean) => {
       if (result) {
         const { column,_id } = store.state.user
@@ -128,6 +145,7 @@ export default defineComponent({
       console.log(error)
       createMessage(`上传图片失败， ${error.message}`,'error')
     }
+    
     return {
       titleRules,
       titleVal,
@@ -136,7 +154,8 @@ export default defineComponent({
       onFormSubmit,
       uploadCheck,
       onFileUploaded,
-      onFileUploadedError
+      onFileUploadedError,
+      uploadedData
     }
   }
 })

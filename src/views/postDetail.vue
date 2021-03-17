@@ -1,28 +1,38 @@
 <template>
     <div class="post-detail-page w-75 mx-auto">
         <div class="post-info row mb-4 border-bottom pb-4 align-items-center" >
-            <img :src="currentImageUrl" :alt="currentPost.title"/>      
+            <img :src="currentImageUrl" :alt="currentTitle"/>      
         </div>
-        <div>
+        <div class="border-bottom  mb-4 pb-4">
             <user-info 
-            v-if="typeof currentPost.author === 'object'"
-            :user="currentPost.author"
+            :user="currentPost.author" 
+            v-if="currentPost && typeof currentPost.author === 'object'"
+            class="col-md-8"
             >
             </user-info>
-           <span class="text-muted col text-right font-italic">发表于：{{currentPost.createdAt}}</span>
+           <span class="text-muted col text-right font-italic col-md-4"  
+                 v-if="currentPost" >发表于：{{currentPost.createdAt}}</span>
         </div>
         <div v-html="currentHTML"></div>
+        <div v-if="showEditArea">
+            <router-link 
+             :to="{name:'create',query:{ id: currentPost._id }}"
+             type="button" 
+             class="btn btn-success"
+            >
+            编辑</router-link>
+            <button type="button" class="btn btn-danger">删除</button>
+        </div>
     </div>
 </template>
 
 <script lang="ts">
     import { defineComponent,ref,onMounted,computed } from "vue";
+    import MarkdownIt from 'markdown-it'
     import { useRoute } from 'vue-router';
     import { useStore } from 'vuex';
-    import { GlobalDataProps, PostProps,ImageProps } from '../store'
+    import { GlobalDataProps, PostProps,ImageProps,UserProps } from '../store'
     import userInfo from '../components/userInfo.vue'
-    import createMessage from '../components/createMessage'
- 
 
     export default defineComponent({
         name: "postDetail",
@@ -31,6 +41,7 @@
         },
         setup() {
             const route = useRoute()
+            const md = new MarkdownIt()
             const store = useStore<GlobalDataProps>()
             const currentId = route.params.id
             onMounted(() => {
@@ -46,16 +57,37 @@
                 }
             })
             const currentHTML = computed(() => {
-                /*if (currentPost.value && currentPost.value.content) {
+                if (currentPost.value && currentPost.value.content) {
                     const { isHTML, content } = currentPost.value
                     return isHTML ? content : md.render(content)
-                }*/
-                return currentPost.value.content
+                }else{
+                     return ''
+                }
+            })
+            const currentTitle = computed(() => {
+                if (currentPost.value && currentPost.value.title) {
+                    const { title } = currentPost.value
+                    return title 
+                }else{
+                     return ''
+                }
+            })
+            const showEditArea = computed(() => {
+                const { isLogin, _id } = store.state.user
+                if(currentPost.value && currentPost.value.author && isLogin){
+                    //因为currentPost.value.author有三种形态，undfined/srting/userprops,类型断言为userprops
+                    const postAuthor = currentPost.value.author as UserProps
+                    return postAuthor._id === _id
+                }else{
+                    return false
+                }
             })
             return{
                 currentPost,
                 currentImageUrl,
-                currentHTML
+                currentHTML,
+                currentTitle,
+                showEditArea
             }
         }
     })

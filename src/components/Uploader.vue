@@ -20,7 +20,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent,ref,PropType  } from 'vue'
+import { defineComponent,ref,PropType,watch } from 'vue'
 import axios from 'axios'
 
 type UploadStatus = 'ready' | 'loading' | 'success' | 'error'
@@ -44,10 +44,16 @@ export default defineComponent({
     emits: ['file-uploaded', 'file-uploaded-error'],
     setup(props,context){
         const fileInput= ref<null | HTMLInputElement>(null)
-        //把成功后data返回slot-图片回显
+        //把成功后data返回slot-图片回显(同步)
+        const fileStatus = ref<UploadStatus>(props.uploaded ? 'success' : 'ready')
         const uploadedData = ref(props.uploaded)  
-        const fileStatus = ref<UploadStatus>('ready')
-    
+        // 异步
+        watch(() => props.uploaded,(newValue) => {
+            if(newValue){
+                fileStatus.value = 'success'
+                uploadedData.value = newValue
+            }
+        })
         const triggerUpload = () => {
             if(fileInput.value){
                 fileInput.value.click()
