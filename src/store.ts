@@ -63,7 +63,12 @@ const postAndCommit = async (url:string,mutationName:string,commit:Commit,payloa
   commit(mutationName,data)
   return data
 }
-
+//公共async方法
+const asyncAndCommit = async (url:string,mutationName:string,commit:Commit,config:AxiosRequestConfig ={ method: 'get' }) => {
+  const { data } = await axios(url,config)
+  commit(mutationName,data)
+  return data
+}
 const store = createStore<GlobalDataProps>({
     state: {
       error:{ status:false },
@@ -77,6 +82,15 @@ const store = createStore<GlobalDataProps>({
       // login(state) {
       //   state.user = {...state.user,isLogin: true,name: 'hxq'}
       // },
+      updatePost(state, { data }) {
+        state.posts = state.posts.map(post => {
+          if (post._id === data._id) {
+            return data
+          } else {
+            return post
+          }
+        })
+      },
       postDetail(state,rawData) {
         state.posts = [rawData.data]
       },
@@ -116,28 +130,21 @@ const store = createStore<GlobalDataProps>({
       },
     },
     actions:{
-      // 获取首页文章列表
-      // async fetchColumns(context) {
-      //   axios.get('/columns').then(resp =>{
-      //      context.commit('fetchColumns',resp.data)
-      //   })
-      // },
+      //获取首页专栏
      fetchColumns({ commit }) {
-      return getAndCommit('/columns','fetchColumns',commit)
-        // const { data } = await axios.get('/columns')  
-        // commit('fetchColumns',data)
+      return asyncAndCommit('/columns','fetchColumns',commit)
       },
       // 获得一个专栏详情
       async fetchColumn({ commit },cid) {
-        return getAndCommit(`/columns/${cid}`,'fetchColumn',commit)
+        return asyncAndCommit(`/columns/${cid}`,'fetchColumn',commit)
       },
       // 获取专栏的文章列表
       async fetchPosts({ commit },cid) {
-        return getAndCommit(`/columns/${cid}/posts`,'fetchPosts',commit)       
+        return asyncAndCommit(`/columns/${cid}/posts`,'fetchPosts',commit)       
       },
       //登录
       login({commit},payload){
-        return postAndCommit(`/user/login`,'login',commit,payload)
+        return asyncAndCommit('/user/login', 'login', commit, { method: 'post', data: payload })
       },
       //获取用户信息
       fetchCurrentUser({ commit }) {
@@ -151,12 +158,19 @@ const store = createStore<GlobalDataProps>({
       },
        //新建文章
       creatPost({ commit }, payload) {
-        return postAndCommit('/posts','createPost', commit, payload)
+        return asyncAndCommit('/posts', 'createPost', commit, { method: 'post', data: payload })
       },
-      //文章详情
+      //获取文章详情
       postDetail({ commit }, cid) {
-        return getAndCommit(`/posts/${cid}`, 'postDetail', commit)
-      }
+        return asyncAndCommit(`/posts/${cid}`, 'postDetail', commit)
+      },
+      //更新文章详情
+      updatePost({ commit }, { id, payload }) {
+        return asyncAndCommit(`/posts/${id}`, 'updatePost', commit, {
+          method: 'patch',
+          data: payload
+        })
+      }, 
     },
     getters :{
       getColumnById:(state) => (id:string) => {
