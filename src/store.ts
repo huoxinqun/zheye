@@ -171,6 +171,12 @@ const store = createStore<GlobalDataProps>({
           data: payload
         })
       }, 
+      //删除文章详情
+      deletePost({ commit }, id ) {
+        return asyncAndCommit(`/posts/${id}`, 'deletePost', commit, {
+          method: 'delete'
+        })
+      }, 
     },
     getters :{
       getColumnById:(state) => (id:string) => {
