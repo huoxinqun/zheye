@@ -44,3 +44,32 @@ export function beforeUploadCheck(file: File, condition: CheckCondition) {
     error
   }
 }
+/**
+ * 数组转对象，key为current中的_id
+ * 
+ * 直接使用current._id报错，要定义约束泛型extends
+ * reduce 第一个传值回调函数：prev-之前结果，current-当前结果
+ *        第二个传值初始值：这里{}, 在空对象赋值current._id报错,所以类型断言{} as {[key: string]: T}
+ * @param arr 
+ * @returns prev
+ */
+export const arrToObj = <T extends {_id?: string}>(arr: Array<T>) => {
+  return arr.reduce((prev, current) => {
+    if(current._id) {
+      prev[current._id] = current
+    }
+    return prev
+  },{} as {[key: string]: T})
+}
+
+/**
+ * 对象转数组
+ * 
+ * 对象先转为数组Object.keys(obj)
+ * @param obj 
+ * @returns 
+ */
+export const objToArr = <T>(obj: {[key:string]: T}) => {
+  return Object.keys(obj).map(key =>obj[key])
+}
+

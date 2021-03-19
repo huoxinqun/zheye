@@ -23,7 +23,7 @@
                 // 执行actions 的 fetchColumns 方法
                 store.dispatch('fetchColumns')
             })
-            const list = computed(() => store.state.columns )
+            const list = computed(() => store.getters.getColumns )
             return {
                 list
             }

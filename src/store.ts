@@ -1,5 +1,6 @@
 import axios,{ AxiosRequestConfig } from 'axios'
 import { createStore,Commit } from 'vuex'
+import { objToArr,arrToObj } from './helper'
 
 export interface ResponseType<P = {}>{
   code: number,
@@ -38,6 +39,9 @@ export interface PostProps {
   author ?: string | UserProps
 }
 
+interface ListProps<P> {
+  [id: string]: P;
+}
 export interface GlobalErrorProps{
   status:boolean;
   message ?: string;
@@ -46,8 +50,8 @@ export interface GlobalDataProps {
   error:GlobalErrorProps;
   loading:boolean;
   user: UserProps;
-  columns:ColumnProps[];
-  posts:PostProps[];
+  columns:ListProps<ColumnProps>;
+  posts:ListProps<PostProps>;
   token: String
 }
 //定义get 公共async方法
@@ -74,37 +78,34 @@ const store = createStore<GlobalDataProps>({
       error:{ status:false },
       loading: false,
       user: { isLogin: false },
-      columns: [],
-      posts: [],
+      columns: {},
+      posts: {},
       token: localStorage.getItem('token') || ''
     },
     mutations: {
       // login(state) {
       //   state.user = {...state.user,isLogin: true,name: 'hxq'}
       // },
+      deletePost(state, { data }) {
+         delete state.posts[data._id]
+      },
       updatePost(state, { data }) {
-        state.posts = state.posts.map(post => {
-          if (post._id === data._id) {
-            return data
-          } else {
-            return post
-          }
-        })
+        state.posts[data._id] = data
       },
       postDetail(state,rawData) {
-        state.posts = [rawData.data]
+        state.posts[rawData._id]
       },
       createPost(state, newPost) {
-        state.posts.push(newPost)
+        state.posts[newPost._id]
       },
       fetchColumns(state,rawData){
-        state.columns = rawData.data.list
+        state.columns = arrToObj(rawData.data.list)
       },
       fetchColumn(state,rawData){
-        state.columns = [rawData.data]
+        state.columns[rawData.data._id] = rawData.data
       },
       fetchPosts(state,rawData){
-        state.posts = rawData.data.list
+        state.posts = arrToObj(rawData.data.list)
       },
       setLoading(state,status) {
         state.loading = status
@@ -179,14 +180,17 @@ const store = createStore<GlobalDataProps>({
       }, 
     },
     getters :{
+      getColumns: (state) => {
+        return objToArr(state.columns)
+      },
       getColumnById:(state) => (id:string) => {
-        return state.columns.find(c => c._id === id)
+        return state.columns[id]
       },
       getPostsByCid:(state) => (cid:string) => {
-        return state.posts.filter(post => post.column === cid)
+        return objToArr(state.posts).filter(post => post.column === cid)
       },
       getCurrentPost: (state) => (id: string) => {
-        return state.posts.find(post => post._id === id)
+        return state.posts[id]
       }
     }
   })
