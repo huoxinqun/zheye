@@ -93,7 +93,10 @@ const store = createStore<GlobalDataProps>({
         state.posts[data._id] = data
       },
       postDetail(state,rawData) {
-        state.posts[rawData._id]
+        //state.posts[rawData._id] undefined
+        // console.log( state.posts[rawData._id])
+        // console.log( rawData.data)
+        state.posts[rawData.data._id] = rawData.data
       },
       createPost(state, newPost) {
         state.posts[newPost._id]
