@@ -16,7 +16,8 @@
 <script lang="ts">
   import { defineComponent,PropType,computed } from 'vue'
   import { ColumnProps } from '../store'
-
+  import { addColumnAvatar } from '../helper'
+  
   export default defineComponent({
     name: 'ColumnList',
     props: {
@@ -26,15 +27,9 @@
       }
     },
     setup(props){
-      const columnList = computed(()=>{
+      const columnList = computed(() => {
         return props.list.map(column => {
-          if (!column.avatar){
-            column.avatar = {
-              url : require('@/assets/logo.png')
-            }
-          }else{
-            column.avatar.url = column.avatar.url + '?x-oss-process=image/resize,m_fixed,h_50,w_50'
-          }
+          addColumnAvatar(column, 50, 50)
           return column
         })
       })
